@@ -178,6 +178,15 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .tp-remove{width:100%;margin-top:6px;padding:4px;border:none;background:none;font-size:11px;color:#DC2626;cursor:pointer}
 .tp-remove:hover{text-decoration:underline}
 
+  /* Styles pour les cartes mobiles */
+.b-day-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--green); }
+input:checked + .slider:before { transform: translateX(20px); }
+
 .test-banner{background:var(--amber-light);border:1px solid #FCD34D;color:var(--amber);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:1.25rem}
 </style>
 </head>
@@ -194,6 +203,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- ═══ BÉNÉVOLE ═══ -->
 <div id="pane-benevole" class="pane visible">
+  <div id="b-mobile-view"></div> <!-- C'est ici que les cartes s'afficheront -->
   <div class="topbar">
     <select id="vol-select" style="width:200px" onchange="onVolSelect()">
       <option value="">— Mon nom —</option>
@@ -917,6 +927,42 @@ function sendCurrent(){
   if(emailIdx<emailList.length-1){emailIdx++;renderEmailPreview();}
   else alert('Tous les courriels ont été ouverts dans Gmail.');
 }
+
+  function renderMobileB() {
+  const container = document.getElementById('b-mobile-view');
+  if(!container) return;
+  container.innerHTML = '';
+
+  DAYS.forEach(day => {
+    const card = document.createElement('div');
+    card.className = 'b-day-card';
+    
+    // Génération des options basée sur TES données d'ouverture
+    let opts = "";
+    for(let h = day.oH; h <= day.cH; h++) {
+      opts += `<option value="${h}">${h}h00</option>`;
+      if (h < day.cH) opts += `<option value="${h+0.5}">${h}h30</option>`;
+    }
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <strong>${day.label}</strong>
+        <label class="switch">
+          <input type="checkbox" id="m-check-${day.id}" onchange="document.getElementById('m-ui-${day.id}').style.display=this.checked?'grid':'none'">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="m-ui-${day.id}" style="display:none; grid-template-columns:1fr 1fr; gap:10px;">
+        <select id="m-start-${day.id}">${opts}</select>
+        <select id="m-end-${day.id}">${opts}</select>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Appelle cette fonction au chargement pour qu'elle s'affiche
+window.addEventListener('load', renderMobileB);
 
 /* ══ INIT ══ */
 initTestData();
