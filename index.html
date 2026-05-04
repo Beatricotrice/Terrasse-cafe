@@ -193,7 +193,29 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <main>
 
 <!-- ═══ BÉNÉVOLE ═══ -->
+<!-- ═══ BÉNÉVOLE SIMPLIFIÉ ═══ -->
 <div id="pane-benevole" class="pane visible">
+  <div class="topbar">
+    <select id="vol-select" style="width:200px" onchange="onVolSelect()">
+      <option value="">— Mon nom —</option>
+    </select>
+    <input type="email" id="vol-email" placeholder="Mon courriel" style="width:210px" oninput="onVolEmailChange()"/>
+    <div class="week-nav">
+      <button class="wbtn" onclick="bShift(-1)">&#8592;</button>
+      <span class="wlabel" id="b-wlabel">—</span>
+      <button class="wbtn" onclick="bShift(1)">&#8594;</button>
+    </div>
+  </div>
+
+  <div class="simple-grid" id="simple-grid" style="display: grid; gap: 1rem; margin: 1rem 0;">
+    <!-- Les jours seront générés ici -->
+  </div>
+
+  <div class="b-actions">
+    <button class="btn btn-primary" onclick="submitAvail()">Enregistrer mes disponibilités</button>
+  </div>
+  <div class="toast" id="b-toast">✓ Enregistré avec succès !</div>
+</div>
   <div class="topbar">
     <select id="vol-select" style="width:200px" onchange="onVolSelect()">
       <option value="">— Mon nom —</option>
@@ -487,40 +509,67 @@ function onVolEmailChange(){
 /* ══ BÉNÉVOLE CALENDAR ══ */
 function bShift(d){bMon=addWeeks(bMon,d);renderB()}
 function clearBSel(){bSel[wkey(bMon)]={};renderB()}
-function renderB(){
-  const wk=wkey(bMon);if(!bSel[wk])bSel[wk]={};
-  document.getElementById('b-wlabel').textContent=wlabel(bMon);
-  const cal=document.getElementById('b-cal');cal.innerHTML='';
-  // corner
-  const corner=document.createElement('div');corner.className='b-corner';cal.appendChild(corner);
-  // headers
-  DAYS.forEach(day=>{
-    const h=document.createElement('div');h.className='b-day-head';
-    h.innerHTML=`<div class="dn">${day.label}</div><div class="dd">${fmt(dayDate(bMon,day.dow))}</div>`;
-    cal.appendChild(h);
+function renderB() {
+  const wk = wkey(bMon);
+  if (!bSel[wk]) bSel[wk] = {};
+  document.getElementById('b-wlabel').textContent = wlabel(bMon);
+  
+  const grid = document.getElementById('simple-grid');
+  grid.innerHTML = '';
+
+  DAYS.forEach(day => {
+    const dayCard = document.createElement('div');
+    dayCard.style = "background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow);";
+    
+    const dayTitle = document.createElement('div');
+    dayTitle.style = "font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem;";
+    dayTitle.textContent = `${day.label} ${fmt(dayDate(bMon, day.dow))}`;
+    dayCard.appendChild(dayTitle);
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.style = "display: flex; gap: 0.5rem; flex-wrap: wrap;";
+
+    // Définition de blocs simplifiés (Matin, Après-midi, Soir selon les heures d'ouverture)
+    const blocks = [
+      { label: 'Début de service', start: day.oH, end: day.oH + 3 },
+      { label: 'Fin de service', start: day.cH - 3, end: day.cH },
+      { label: 'Journée complète', start: day.oH, end: day.cH }
+    ];
+
+    blocks.forEach(block => {
+      const btn = document.createElement('button');
+      btn.className = "btn btn-sm";
+      btn.textContent = block.label;
+      
+      // Vérifie si toutes les demi-heures du bloc sont sélectionnées
+      const isSelected = checkBlockSelected(wk, day.id, block.start, block.end);
+      if (isSelected) btn.classList.add('btn-primary');
+
+      btn.onclick = () => toggleSimpleBlock(wk, day.id, block.start, block.end, isSelected);
+      optionsDiv.appendChild(btn);
+    });
+
+    dayCard.appendChild(optionsDiv);
+    grid.appendChild(dayCard);
   });
-  // time col
-  const tcol=document.createElement('div');tcol.className='b-time-col';
-  for(let s=0;s<TOTAL_SLOTS;s++){
-    const m=slotMins(s),full=m%60===0;
-    const el=document.createElement('div');el.className='b-time-slot'+(full?' hour':' half');
-    if(full)el.textContent=Math.floor(m/60)+'h';tcol.appendChild(el);
+}
+
+function checkBlockSelected(wk, dayId, startH, endH) {
+  for (let h = startH; h < endH; h += 0.5) {
+    const s = Math.round((h * 60 - GSH * 60) / 30);
+    if (!bSel[wk][skey(dayId, s)]) return false;
   }
-  cal.appendChild(tcol);
-  // day columns
-  DAYS.forEach(day=>{
-    const col=document.createElement('div');col.className='b-day-col';
-    for(let s=0;s<TOTAL_SLOTS;s++){
-      const open=isOpen(day,s),k=skey(day.id,s),sel=!!(bSel[wk][k]),half=slotMins(s)%60!==0;
-      const cell=document.createElement('div');
-      cell.className='b-cell'+(half?' half':'')+(open?(sel?' selected':' open'):' closed');
-      cell.dataset.day=day.id;cell.dataset.slot=s;cell.dataset.open=open?'1':'0';
-      if(open){cell.addEventListener('mousedown',bMD);cell.addEventListener('mouseenter',bME);}
-      col.appendChild(cell);
-    }
-    cal.appendChild(col);
-  });
-  updateBSummary();
+  return true;
+}
+
+function toggleSimpleBlock(wk, dayId, startH, endH, currentlySelected) {
+  for (let h = startH; h < endH; h += 0.5) {
+    const s = Math.round((h * 60 - GSH * 60) / 30);
+    const k = skey(dayId, s);
+    if (currentlySelected) delete bSel[wk][k];
+    else bSel[wk][k] = true;
+  }
+  renderB();
 }
 function bMD(e){
   e.preventDefault();const c=e.currentTarget;if(c.dataset.open!=='1')return;
