@@ -194,6 +194,24 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- ═══ BÉNÉVOLE ═══ -->
 <div id="pane-benevole" class="pane visible">
+  <div class="topbar" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+    <select id="vol-select" style="padding:12px; border-radius:8px; border:1px solid var(--border); font-size:16px;">
+      <option value="">— Sélectionner mon nom —</option>
+    </select>
+    <div class="week-nav" style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:8px; border:1px solid var(--border);">
+      <button class="wbtn" onclick="bShift(-1)">←</button>
+      <span id="b-wlabel" style="font-weight:600;"></span>
+      <button class="wbtn" onclick="bShift(1)">→</button>
+    </div>
+  </div>
+
+  <!-- Conteneur pour les cartes mobiles -->
+  <div id="b-cards-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+  <button class="btn btn-primary" onclick="submitAvail()" style="width:100%; margin-top:20px; padding:15px; background:var(--text); color:#fff; border-radius:8px; font-weight:600;">
+    Envoyer mes disponibilités
+  </button>
+</div>
   <div class="topbar">
     <select id="vol-select" style="width:200px" onchange="onVolSelect()">
       <option value="">— Mon nom —</option>
@@ -487,40 +505,45 @@ function onVolEmailChange(){
 /* ══ BÉNÉVOLE CALENDAR ══ */
 function bShift(d){bMon=addWeeks(bMon,d);renderB()}
 function clearBSel(){bSel[wkey(bMon)]={};renderB()}
-function renderB(){
-  const wk=wkey(bMon);if(!bSel[wk])bSel[wk]={};
-  document.getElementById('b-wlabel').textContent=wlabel(bMon);
-  const cal=document.getElementById('b-cal');cal.innerHTML='';
-  // corner
-  const corner=document.createElement('div');corner.className='b-corner';cal.appendChild(corner);
-  // headers
-  DAYS.forEach(day=>{
-    const h=document.createElement('div');h.className='b-day-head';
-    h.innerHTML=`<div class="dn">${day.label}</div><div class="dd">${fmt(dayDate(bMon,day.dow))}</div>`;
-    cal.appendChild(h);
-  });
-  // time col
-  const tcol=document.createElement('div');tcol.className='b-time-col';
-  for(let s=0;s<TOTAL_SLOTS;s++){
-    const m=slotMins(s),full=m%60===0;
-    const el=document.createElement('div');el.className='b-time-slot'+(full?' hour':' half');
-    if(full)el.textContent=Math.floor(m/60)+'h';tcol.appendChild(el);
-  }
-  cal.appendChild(tcol);
-  // day columns
-  DAYS.forEach(day=>{
-    const col=document.createElement('div');col.className='b-day-col';
-    for(let s=0;s<TOTAL_SLOTS;s++){
-      const open=isOpen(day,s),k=skey(day.id,s),sel=!!(bSel[wk][k]),half=slotMins(s)%60!==0;
-      const cell=document.createElement('div');
-      cell.className='b-cell'+(half?' half':'')+(open?(sel?' selected':' open'):' closed');
-      cell.dataset.day=day.id;cell.dataset.slot=s;cell.dataset.open=open?'1':'0';
-      if(open){cell.addEventListener('mousedown',bMD);cell.addEventListener('mouseenter',bME);}
-      col.appendChild(cell);
+function renderB() {
+  const container = document.getElementById('b-cards-container');
+  container.innerHTML = '';
+  document.getElementById('b-wlabel').textContent = wlabel(bMon); // Utilise ta fonction wlabel existante
+
+  DAYS.forEach(day => {
+    const card = document.createElement('div');
+    card.style = "background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow);";
+    
+    // Génération des options d'heures (30 min par 30 min)
+    let hourOptions = "";
+    for(let h = day.oH; h <= day.cH; h++) {
+      hourOptions += `<option value="${h}">${h}h00</option>`;
+      if (h < day.cH || (h === day.cH && day.cM === 30)) {
+        hourOptions += `<option value="${h+0.5}">${h}h30</option>`;
+      }
     }
-    cal.appendChild(col);
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <strong style="font-size:16px;">${day.label}</strong>
+        <label class="switch" style="position:relative; display:inline-block; width:44px; height:24px;">
+          <input type="checkbox" id="check-${day.id}" onchange="document.getElementById('ui-${day.id}').style.display=this.checked?'grid':'none'">
+          <span class="slider" style="position:absolute; cursor:pointer; inset:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
+        </label>
+      </div>
+      <div id="ui-${day.id}" style="display:none; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label style="font-size:10px; color:#A8A29E; display:block;">DE</label>
+          <select id="start-${day.id}" style="width:100%; padding:8px; border-radius:6px; border:1px solid #E2DDD8;">${hourOptions}</select>
+        </div>
+        <div>
+          <label style="font-size:10px; color:#A8A29E; display:block;">À</label>
+          <select id="end-${day.id}" style="width:100%; padding:8px; border-radius:6px; border:1px solid #E2DDD8;">${hourOptions}</select>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
   });
-  updateBSummary();
 }
 function bMD(e){
   e.preventDefault();const c=e.currentTarget;if(c.dataset.open!=='1')return;
