@@ -511,21 +511,31 @@ function timeOptions(openH,openM,closeH,closeM){
   return opts;
 }
 
-function buildTimeSelect(day,type,savedVal){
-  const sel=document.createElement('select');
-  sel.className='';
-  const openH=day.oH,openM=day.oM,closeH=day.cH,closeM=day.cM;
-  // For "from": options from open to close-30; for "to": open+30 to close
-  let startM=openH*60+openM,endM=closeH*60+closeM;
-  if(type==='to')startM+=30; else endM-=30;
-  let m=startM;
-  while(m<=endM){
-    const o=document.createElement('option');
-    const label=mStr(m);o.value=m;o.textContent=label;
-    if(savedVal!==undefined&&savedVal===m)o.selected=true;
-    else if(savedVal===undefined&&type==='from'&&m===startM)o.selected=true;
-    else if(savedVal===undefined&&type==='to'&&m===endM)o.selected=true;
-    sel.appendChild(o);m+=30;
+function buildTimeSelect(day, type, savedVal, minMins = null) {
+  const sel = document.createElement('select');
+  const openH = day.oH, openM = day.oM, closeH = day.cH, closeM = day.cM;
+  
+  let startM = openH * 60 + openM, endM = closeH * 60 + closeM;
+  if (type === 'to') startM += 30; else endM -= 30;
+  
+  let m = startM;
+  while (m <= endM) {
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = mStr(m);
+    
+    // Griser les options si elles sont inférieures ou égales au minimum spécifié
+    if (minMins !== null && m <= minMins) {
+      o.disabled = true;
+      o.style.color = '#A8A29E'; // Optionnel : force une couleur grise
+    }
+
+    if (savedVal !== undefined && savedVal === m) o.selected = true;
+    else if (savedVal === undefined && type === 'from' && m === startM) o.selected = true;
+    else if (savedVal === undefined && type === 'to' && m === endM) o.selected = true;
+    
+    sel.appendChild(o);
+    m += 30;
   }
   return sel;
 }
@@ -1005,34 +1015,37 @@ function openTP(e, name, sid, role, shift, wk) {
   const rng = volDayRange(wk, name);
   const day = DAYS.find(d => d.id === curDay);
 
-  // Valeurs par défaut en minutes (calculées comme dans ton code original)
-  const ds = rng ? Math.max(rng.startMins, shift.fromH * 60) : shift.fromH * 60;
-  const de = rng ? Math.min(rng.endMins, shift.toH * 60) : shift.toH * 60;
-  const startVal = ct ? ct.s : ds;
-  const endVal = ct ? ct.e : de;
+  const startVal = ct ? ct.s : (rng ? Math.max(rng.startMins, shift.fromH * 60) : shift.fromH * 60);
+  const endVal = ct ? ct.e : (rng ? Math.min(rng.endMins, shift.toH * 60) : shift.toH * 60);
 
-  // On cible les div qui contiennent les labels dans .tp-fields[cite: 1]
   const containers = document.querySelectorAll('.tp-fields > div');
   
-  // On vide les div et on injecte le label + le select "maison" buildTimeSelect[cite: 1]
+  // Fonction interne pour rafraîchir le menu de fin
+  const refreshEndSelect = (newMin) => {
+    containers[1].innerHTML = '<label>Fin</label>';
+    const currentEnd = parseInt(document.getElementById('tp-end')?.value || endVal);
+    // Si l'heure de fin actuelle devient invalide, on prend le palier suivant
+    const safeEnd = currentEnd <= newMin ? newMin + 30 : currentEnd;
+    
+    const eSel = buildTimeSelect(day, 'to', safeEnd, newMin);
+    eSel.id = 'tp-end';
+    containers[1].appendChild(eSel);
+  };
+
+  // Injection du menu Début
   containers[0].innerHTML = '<label>Début</label>';
   const sSel = buildTimeSelect(day, 'from', startVal);
-  sSel.id = 'tp-start'; // On garde l'ID pour que saveTP() puisse le trouver
+  sSel.id = 'tp-start';
   containers[0].appendChild(sSel);
 
-  containers[1].innerHTML = '<label>Fin</label>';
-  const eSel = buildTimeSelect(day, 'to', endVal);
-  eSel.id = 'tp-end';
-  containers[1].appendChild(eSel);
+  // Injection initiale du menu Fin
+  refreshEndSelect(startVal);
 
-  // Synchronisation pour empêcher que la fin soit avant le début
-  sSel.addEventListener('change', () => {
-    if (parseInt(eSel.value) <= parseInt(sSel.value)) {
-      eSel.value = parseInt(sSel.value) + 30;
-    }
+  // Écouteur : quand le début change, on grise les nouvelles options dans Fin
+  sSel.addEventListener('change', (ev) => {
+    refreshEndSelect(parseInt(ev.target.value));
   });
 
-  // Affichage et positionnement du popover[cite: 1]
   const pop = document.getElementById('time-pop');
   pop.classList.add('open');
   const rect = e.currentTarget.getBoundingClientRect();
