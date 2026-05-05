@@ -56,24 +56,25 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-icon{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
 
-/* ── BÉNÉVOLE CAL ── */
-.b-cal-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
-.b-cal{display:grid;grid-template-columns:52px repeat(4,1fr);min-width:600px}
-.b-corner{background:var(--bg);border-right:1px solid var(--border);border-bottom:1px solid var(--border);height:50px}
-.b-day-head{background:var(--bg);border-right:1px solid var(--border-light);border-bottom:1px solid var(--border);padding:10px 8px;text-align:center}
-.b-day-head:last-child{border-right:none}
-.b-day-head .dn{font-size:13px;font-weight:600}.b-day-head .dd{font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--mono)}
-.b-time-col{background:var(--bg);border-right:1px solid var(--border)}
-.b-time-slot{height:28px;display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 8px 0;font-size:10px;font-family:var(--mono);color:var(--text-3);border-bottom:1px solid var(--border-light)}
-.b-time-slot.hour{color:var(--text-2);border-bottom-color:var(--border)}.b-time-slot.half{border-bottom-style:dashed}
-.b-day-col{border-right:1px solid var(--border-light)}.b-day-col:last-child{border-right:none}
-.b-cell{height:28px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .05s}
-.b-cell.half{border-bottom-style:dashed}.b-cell.closed{background:var(--bg);cursor:default}
-.b-cell.open:hover{background:#FEF3C7}.b-cell.selected{background:#FED7AA}.b-cell.selected:hover{background:#FDBA74}
-.b-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:center}
-.b-leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
-.b-leg-sw{width:13px;height:13px;border-radius:3px}
-.b-summary{font-size:12px;color:var(--text-2);margin-top:8px;min-height:18px;font-family:var(--mono)}
+/* ── BÉNÉVOLE CARDS ── */
+.b-days-wrap{display:flex;flex-direction:column;gap:10px;max-width:680px}
+.b-day-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);padding:16px 18px;transition:box-shadow .15s}
+.b-day-card.active{box-shadow:0 0 0 2px #16A34A40,var(--shadow)}
+.b-day-card-head{display:flex;align-items:center;justify-content:space-between}
+.b-day-card-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.b-day-card-title span{font-size:13px;font-weight:400;color:var(--text-3);margin-left:6px}
+.b-day-card-body{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.b-field label{display:block;font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.b-field select{width:100%;padding:10px 36px 10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);background:var(--surface);color:var(--text);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2357534E' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;outline:none;transition:border-color .15s}
+.b-field select:focus{border-color:var(--accent)}
+/* Toggle */
+.b-toggle{position:relative;width:46px;height:26px;cursor:pointer;flex-shrink:0}
+.b-toggle input{opacity:0;width:0;height:0;position:absolute}
+.b-toggle-track{position:absolute;inset:0;background:var(--border);border-radius:13px;transition:background .2s}
+.b-toggle input:checked~.b-toggle-track{background:var(--green)}
+.b-toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .2s}
+.b-toggle input:checked~.b-toggle-thumb{transform:translateX(20px)}
+.b-summary{font-size:12px;color:var(--text-2);margin-top:6px;min-height:18px;font-family:var(--mono);max-width:680px}
 .b-actions{display:flex;gap:8px;margin-top:1rem}
 .toast{margin-top:12px;padding:9px 14px;border-radius:var(--radius-sm);background:var(--green-light);border:1px solid #86EFAC;color:var(--green);font-size:13px;display:none}
 
@@ -193,7 +194,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <main>
 
 <!-- ═══ BÉNÉVOLE ═══ -->
-<!-- ═══ BÉNÉVOLE SIMPLIFIÉ ═══ -->
 <div id="pane-benevole" class="pane visible">
   <div class="topbar">
     <select id="vol-select" style="width:200px" onchange="onVolSelect()">
@@ -206,40 +206,13 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="wbtn" onclick="bShift(1)">&#8594;</button>
     </div>
   </div>
-
-  <div class="simple-grid" id="simple-grid" style="display: grid; gap: 1rem; margin: 1rem 0;">
-    <!-- Les jours seront générés ici -->
-  </div>
-
-  <div class="b-actions">
-    <button class="btn btn-primary" onclick="submitAvail()">Enregistrer mes disponibilités</button>
-  </div>
-  <div class="toast" id="b-toast">✓ Enregistré avec succès !</div>
-</div>
-  <div class="topbar">
-    <select id="vol-select" style="width:200px" onchange="onVolSelect()">
-      <option value="">— Mon nom —</option>
-    </select>
-    <input type="email" id="vol-email" placeholder="Mon courriel" style="width:210px" oninput="onVolEmailChange()"/>
-    <div class="week-nav">
-      <button class="wbtn" onclick="bShift(-1)">&#8592;</button>
-      <span class="wlabel" id="b-wlabel">—</span>
-      <button class="wbtn" onclick="bShift(1)">&#8594;</button>
-    </div>
-    <button class="btn btn-sm" onclick="clearBSel()">Effacer</button>
-  </div>
-  <div class="b-cal-wrap"><div class="b-cal" id="b-cal"></div></div>
-  <div class="b-legend">
-    <div class="b-leg-item"><div class="b-leg-sw" style="background:#FED7AA;border:1px solid #FDBA74"></div>Disponible</div>
-    <div class="b-leg-item"><div class="b-leg-sw" style="background:var(--bg);border:1px solid var(--border)"></div>Fermé</div>
-  </div>
+  <div class="b-days-wrap" id="b-days-wrap"></div>
   <div class="b-summary" id="b-summary"></div>
   <div class="b-actions">
     <button class="btn btn-primary" onclick="submitAvail()">Envoyer mes disponibilités</button>
-    <button class="btn btn-sm" onclick="clearBSel()">Effacer</button>
+    <button class="btn btn-sm" onclick="clearBSel()">Effacer tout</button>
   </div>
-  <div style="font-size:12px;color:var(--text-3);margin-top:8px">Cliquez et glissez pour sélectionner vos plages de disponibilité.</div>
-  <div class="toast" id="b-toast">✓ Disponibilités enregistrées. Merci !</div>
+  <div class="toast" id="b-toast">&#10003; Disponibilités enregistrées. Merci !</div>
 </div>
 
 <!-- ═══ ORGANISATRICE ═══ -->
@@ -335,6 +308,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       </div>
     </div>
     <div class="modal-btns">
+      <button class="btn btn-danger btn-sm" id="pm-delete" onclick="deletePersonFromModal()" style="margin-right:auto;display:none">Supprimer</button>
       <button class="btn btn-sm" onclick="closePersonModal()">Annuler</button>
       <button class="btn btn-primary btn-sm" onclick="savePerson()">Enregistrer</button>
     </div>
@@ -468,8 +442,15 @@ function rebuildVcols(){
   vols.forEach((p,i)=>vcols[p.name]=VCOLS[i%VCOLS.length]);
 }
 
+/* ══ SECRET KEY ══ */
+const SECRET_KEY='cafe2025'; // ← changer ici pour personnaliser
+let orgUnlocked=new URLSearchParams(location.search).get('cle')===SECRET_KEY;
+
 /* ══ TAB SWITCHING ══ */
 function switchMain(id,btn){
+  if(id==='organisatrice'&&!orgUnlocked){
+    alert('Accès refusé. Utilisez le lien organisatrice.');return;
+  }
   document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('pane-benevole').classList.toggle('visible',id==='benevole');
@@ -506,97 +487,150 @@ function onVolEmailChange(){
   const p=getPerson(name);if(p&&email)p.email=email;
 }
 
-/* ══ BÉNÉVOLE CALENDAR ══ */
+/* ══ BÉNÉVOLE CARDS ══ */
+// bSel stores per-week per-day: {wk: {dayId: {from: '11:00', to: '17:00'}}}
 function bShift(d){bMon=addWeeks(bMon,d);renderB()}
-function clearBSel(){bSel[wkey(bMon)]={};renderB()}
-function renderB() {
-  const wk = wkey(bMon);
-  if (!bSel[wk]) bSel[wk] = {};
-  document.getElementById('b-wlabel').textContent = wlabel(bMon);
-  
-  const grid = document.getElementById('simple-grid');
-  grid.innerHTML = '';
 
-  DAYS.forEach(day => {
-    const dayCard = document.createElement('div');
-    dayCard.style = "background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow);";
-    
-    const dayTitle = document.createElement('div');
-    dayTitle.style = "font-weight: 600; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem;";
-    dayTitle.textContent = `${day.label} ${fmt(dayDate(bMon, day.dow))}`;
-    dayCard.appendChild(dayTitle);
+function timeOptions(openH,openM,closeH,closeM){
+  const opts=[];
+  let m=openH*60+openM;
+  const end=closeH*60+closeM;
+  while(m<=end){opts.push(mStr(m));m+=30;}
+  return opts;
+}
 
-    const optionsDiv = document.createElement('div');
-    optionsDiv.style = "display: flex; gap: 0.5rem; flex-wrap: wrap;";
+function buildTimeSelect(day,type,savedVal){
+  const sel=document.createElement('select');
+  sel.className='';
+  const openH=day.oH,openM=day.oM,closeH=day.cH,closeM=day.cM;
+  // For "from": options from open to close-30; for "to": open+30 to close
+  let startM=openH*60+openM,endM=closeH*60+closeM;
+  if(type==='to')startM+=30; else endM-=30;
+  let m=startM;
+  while(m<=endM){
+    const o=document.createElement('option');
+    const label=mStr(m);o.value=m;o.textContent=label;
+    if(savedVal!==undefined&&savedVal===m)o.selected=true;
+    else if(savedVal===undefined&&type==='from'&&m===startM)o.selected=true;
+    else if(savedVal===undefined&&type==='to'&&m===endM)o.selected=true;
+    sel.appendChild(o);m+=30;
+  }
+  return sel;
+}
 
-    // Définition de blocs simplifiés (Matin, Après-midi, Soir selon les heures d'ouverture)
-    const blocks = [
-      { label: 'Début de service', start: day.oH, end: day.oH + 3 },
-      { label: 'Fin de service', start: day.cH - 3, end: day.cH },
-      { label: 'Journée complète', start: day.oH, end: day.cH }
-    ];
+function renderB(){
+  const wk=wkey(bMon);
+  if(!bSel[wk])bSel[wk]={};
+  document.getElementById('b-wlabel').textContent=wlabel(bMon);
+  const wrap=document.getElementById('b-days-wrap');
+  wrap.innerHTML='';
 
-    blocks.forEach(block => {
-      const btn = document.createElement('button');
-      btn.className = "btn btn-sm";
-      btn.textContent = block.label;
-      
-      // Vérifie si toutes les demi-heures du bloc sont sélectionnées
-      const isSelected = checkBlockSelected(wk, day.id, block.start, block.end);
-      if (isSelected) btn.classList.add('btn-primary');
+  DAYS.forEach(day=>{
+    const dayData=bSel[wk][day.id]||null;
+    const enabled=!!(dayData);
 
-      btn.onclick = () => toggleSimpleBlock(wk, day.id, block.start, block.end, isSelected);
-      optionsDiv.appendChild(btn);
+    const card=document.createElement('div');
+    card.className='b-day-card'+(enabled?' active':'');
+
+    // Head row
+    const head=document.createElement('div');
+    head.className='b-day-card-head';
+
+    const title=document.createElement('div');
+    title.className='b-day-card-title';
+    title.innerHTML=day.label+' <span>'+fmt(dayDate(bMon,day.dow))+'</span>';
+
+    // Toggle
+    const toggleLabel=document.createElement('label');
+    toggleLabel.className='b-toggle';
+    const chk=document.createElement('input');
+    chk.type='checkbox';chk.checked=enabled;
+    const track=document.createElement('span');track.className='b-toggle-track';
+    const thumb=document.createElement('span');thumb.className='b-toggle-thumb';
+    toggleLabel.appendChild(chk);toggleLabel.appendChild(track);toggleLabel.appendChild(thumb);
+
+    head.appendChild(title);head.appendChild(toggleLabel);
+    card.appendChild(head);
+
+    // Body (time selects)
+    const body=document.createElement('div');
+    body.className='b-day-card-body';
+    body.style.display=enabled?'grid':'none';
+
+    const fromField=document.createElement('div');fromField.className='b-field';
+    const fromLabel=document.createElement('label');fromLabel.textContent='DE';
+    const fromSel=buildTimeSelect(day,'from',dayData?dayData.from:undefined);
+    fromField.appendChild(fromLabel);fromField.appendChild(fromSel);
+
+    const toField=document.createElement('div');toField.className='b-field';
+    const toLabel=document.createElement('label');toLabel.textContent='À';
+    const toSel=buildTimeSelect(day,'to',dayData?dayData.to:undefined);
+    toField.appendChild(toLabel);toField.appendChild(toSel);
+
+    body.appendChild(fromField);body.appendChild(toField);
+    card.appendChild(body);
+
+    // Events
+    function saveDay(){
+      bSel[wk][day.id]={from:parseInt(fromSel.value),to:parseInt(toSel.value)};
+      updateBSummary();
+    }
+    function syncToMin(){
+      // ensure 'to' > 'from'
+      if(parseInt(toSel.value)<=parseInt(fromSel.value)){
+        toSel.value=parseInt(fromSel.value)+30;
+      }
+      saveDay();
+    }
+    chk.addEventListener('change',()=>{
+      const on=chk.checked;
+      card.classList.toggle('active',on);
+      body.style.display=on?'grid':'none';
+      if(on){saveDay();}
+      else{delete bSel[wk][day.id];updateBSummary();}
     });
+    fromSel.addEventListener('change',syncToMin);
+    toSel.addEventListener('change',saveDay);
 
-    dayCard.appendChild(optionsDiv);
-    grid.appendChild(dayCard);
+    // Init default save if enabled
+    if(enabled&&!bSel[wk][day.id]){saveDay();}
+
+    wrap.appendChild(card);
   });
-}
-
-function checkBlockSelected(wk, dayId, startH, endH) {
-  for (let h = startH; h < endH; h += 0.5) {
-    const s = Math.round((h * 60 - GSH * 60) / 30);
-    if (!bSel[wk][skey(dayId, s)]) return false;
-  }
-  return true;
-}
-
-function toggleSimpleBlock(wk, dayId, startH, endH, currentlySelected) {
-  for (let h = startH; h < endH; h += 0.5) {
-    const s = Math.round((h * 60 - GSH * 60) / 30);
-    const k = skey(dayId, s);
-    if (currentlySelected) delete bSel[wk][k];
-    else bSel[wk][k] = true;
-  }
-  renderB();
-}
-function bMD(e){
-  e.preventDefault();const c=e.currentTarget;if(c.dataset.open!=='1')return;
-  const wk=wkey(bMon),k=skey(c.dataset.day,c.dataset.slot);
-  bDragMode=bSel[wk][k]?'del':'add';bDrag=true;applyBDrag(c);
-  document.addEventListener('mouseup',()=>{bDrag=false;bDragMode=null},{once:true});
-}
-function bME(e){if(!bDrag)return;applyBDrag(e.currentTarget)}
-function applyBDrag(c){
-  const wk=wkey(bMon),k=skey(c.dataset.day,c.dataset.slot);
-  if(bDragMode==='add'){bSel[wk][k]=true;c.classList.remove('open');c.classList.add('selected');}
-  else{delete bSel[wk][k];c.classList.remove('selected');c.classList.add('open');}
   updateBSummary();
 }
+
+function clearBSel(){
+  bSel[wkey(bMon)]={};
+  renderB();
+}
+
 function updateBSummary(){
   const wk=wkey(bMon),sel=bSel[wk]||{};
-  const counts={};Object.keys(sel).forEach(k=>{const d=k.split('_')[0];counts[d]=(counts[d]||0)+1});
-  const parts=DAYS.filter(d=>counts[d.id]).map(d=>d.label+': '+(counts[d.id]*.5)+'h');
-  document.getElementById('b-summary').textContent=parts.length?'Sélectionné — '+parts.join('  ·  '):'';
+  const parts=DAYS.filter(d=>sel[d.id]).map(d=>{
+    const {from,to}=sel[d.id];
+    return d.label+': '+mStr(from)+' – '+mStr(to);
+  });
+  document.getElementById('b-summary').textContent=parts.length?parts.join('  ·  '):'';
 }
+
 function submitAvail(){
   const name=document.getElementById('vol-select').value;
   if(!name){alert('Sélectionnez votre nom.');return}
   const wk=wkey(bMon),sel=bSel[wk]||{};
-  if(!Object.keys(sel).length){alert('Sélectionnez au moins une plage.');return}
+  if(!Object.keys(sel).length){alert('Activez au moins un jour.');return}
+  // Convert card selections back to slot-based format for org view
   if(!avail[wk])avail[wk]={};
-  avail[wk][name]={slots:{...sel}};
+  const slots={};
+  DAYS.forEach(day=>{
+    if(!sel[day.id])return;
+    const {from,to}=sel[day.id];
+    for(let m=from;m<to;m+=30){
+      const s=Math.round((m-GSH*60)/30);
+      slots[skey(day.id,s)]=true;
+    }
+  });
+  avail[wk][name]={slots};
   const t=document.getElementById('b-toast');t.style.display='block';
   setTimeout(()=>t.style.display='none',3000);
 }
@@ -651,10 +685,11 @@ function setAssignTimes(wk,sid,role,s,e){
 /* drag highlight */
 function highlightDZs(wk,shifts){
   shifts.forEach(sh=>{
+    const alreadyOnShift=!isEmp(draggingVol)&&volAssignedToShift(wk,draggingVol,sh);
     [...sh.roles,...(sh.optional||[])].forEach(role=>{
       const dz=document.getElementById('dz-'+sh.id+'-'+role.replace(/[^a-z0-9]/gi,'_'));
       if(!dz||dz.classList.contains('filled'))return;
-      const v=volCoversShift(wk,draggingVol,sh);
+      const v=volCoversShift(wk,draggingVol,sh)&&!alreadyOnShift;
       dz.classList.toggle('dv',v);dz.classList.toggle('di',!v);
     });
   });
@@ -743,26 +778,27 @@ function renderHoraire(){
         // replacement drop
         dz.addEventListener('dragover',e=>{
           if(!draggingVol||!volCoversShift(wk,draggingVol,shift))return;
+          if(!isEmp(draggingVol)&&volAssignedToShift(wk,draggingVol,shift)&&getAssign(wk,shift.id,role)!==draggingVol)return;
           e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');
         });
         dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
         dz.addEventListener('drop',e=>{
           dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
           if(!name||!volCoversShift(wk,name,shift))return;
-          e.preventDefault();setAssign(wk,shift.id,role,name);renderHoraire();
+          e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
         });
       } else {
         dz.classList.add('empty');
         const ph=document.createElement('span');ph.className='dz-ph';ph.textContent='— glissez ici';dz.appendChild(ph);
         dz.addEventListener('dragover',e=>{
-          if(draggingVol&&volCoversShift(wk,draggingVol,shift)){e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');}
+          if(draggingVol&&volCoversShift(wk,draggingVol,shift)&&(!isEmp(draggingVol)?!volAssignedToShift(wk,draggingVol,shift):true)){e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');}
           else e.dataTransfer.dropEffect='none';
         });
         dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
         dz.addEventListener('drop',e=>{
           dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
           if(!name||!volCoversShift(wk,name,shift))return;
-          e.preventDefault();setAssign(wk,shift.id,role,name);renderHoraire();
+          e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
         });
       }
       tl.appendChild(dz);row.appendChild(tl);grid.appendChild(row);
@@ -775,28 +811,108 @@ function renderHoraire(){
   buildCards(wk,shifts);
 }
 
+/* ══ HOURS ACCOUNTING ══ */
+
+// Returns total available minutes for a volunteer on curDay
+function volTotalAvailMins(wk, name){
+  const slots=((avail[wk]||{})[name]||{}).slots||{};
+  let count=0;
+  for(const k of Object.keys(slots)){if(k.startsWith(curDay+'_'))count++;}
+  return count*30;
+}
+
+// Returns minutes already assigned for a volunteer on curDay (across all shifts)
+function volAssignedMins(wk, name){
+  const shifts=SHIFTS[curDay]||[];
+  let total=0;
+  shifts.forEach(sh=>{
+    const allR=[...sh.roles,...(sh.optional||[])];
+    allR.forEach(role=>{
+      if(getAssign(wk,sh.id,role)!==name)return;
+      const ct=getAssignTimes(wk,sh.id,role);
+      if(ct){total+=ct.e-ct.s;}
+      else{
+        // overlap mins
+        const r=volDayRange(wk,name);
+        const s=r?Math.max(r.startMins,sh.fromH*60):sh.fromH*60;
+        const e=r?Math.min(r.endMins,sh.toH*60):sh.toH*60;
+        if(e>s)total+=e-s;
+      }
+    });
+  });
+  return total;
+}
+
+// Returns remaining available minutes for a vol on curDay
+function volRemainingMins(wk, name){
+  return Math.max(0, volTotalAvailMins(wk,name)-volAssignedMins(wk,name));
+}
+
+// Is the volunteer already assigned to any role in this shift?
+function volAssignedToShift(wk, name, shift){
+  const allR=[...shift.roles,...(shift.optional||[])];
+  return allR.some(role=>getAssign(wk,shift.id,role)===name);
+}
+
+// Compute overlap mins between vol availability and shift
+function overlapMins(wk, name, shift){
+  const r=volDayRange(wk,name);
+  if(!r)return null;
+  const s=Math.max(r.startMins, shift.fromH*60);
+  const e=Math.min(r.endMins, shift.toH*60);
+  if(e<=s)return null;
+  return {s,e};
+}
+
 function buildCards(wk,shifts){
   const wkData=avail[wk]||{};
   const vp=document.getElementById('vol-cards'),ep=document.getElementById('emp-cards');
   vp.innerHTML='';ep.innerHTML='';
 
-  function isFullyPlaced(name){
-    const coverable=shifts.filter(sh=>volCoversShift(wk,name,sh));
-    if(!coverable.length)return false;
-    return coverable.every(sh=>[...sh.roles,...(sh.optional||[])].some(r=>getAssign(wk,sh.id,r)===name));
-  }
+  function makeCard(name,col,emp){
+    const remaining=emp?null:volRemainingMins(wk,name);
+    if(!emp&&remaining===0)return null; // fully placed — hide card
 
-  function makeCard(name,col,emp,range){
     const card=document.createElement('div');
     card.className='vol-card'+(emp?' emp-card':'');
     card.draggable=true;card.style.background=col.bg;card.style.borderColor=col.fg+(emp?'':'60');
+
     const nm=document.createElement('div');nm.className='vc-name';nm.style.color=col.fg;
     if(emp){nm.innerHTML=`<span class="emp-badge" style="color:${col.fg};margin-right:5px">EMP</span>${name}`;}
     else nm.textContent=name;
     card.appendChild(nm);
+
     const t=document.createElement('div');t.className='vc-time';t.style.color=col.fg;
-    t.textContent=emp?'Plein shift':(range?mStr(range.startMins)+' – '+mStr(range.endMins):'');
+    if(emp){
+      t.textContent='Plein shift';
+    } else {
+      // Compute remaining free segments: full avail range minus assigned blocks
+      const r=volDayRange(wk,name);
+      if(r){
+        // Collect assigned intervals on this day, sorted
+        const assigned=[];
+        (SHIFTS[curDay]||[]).forEach(sh=>{
+          [...sh.roles,...(sh.optional||[])].forEach(role=>{
+            if(getAssign(wk,sh.id,role)!==name)return;
+            const ct=getAssignTimes(wk,sh.id,role);
+            if(ct)assigned.push({s:ct.s,e:ct.e});
+            else{
+              const ov=overlapMins(wk,name,sh);
+              if(ov)assigned.push({s:ov.s,e:ov.e});
+            }
+          });
+        });
+        assigned.sort((a,b)=>a.s-b.s);
+        // Subtract assigned from [r.startMins, r.endMins]
+        const free=[];
+        let cur=r.startMins;
+        assigned.forEach(({s,e})=>{if(s>cur)free.push({s:cur,e:s});cur=Math.max(cur,e);});
+        if(cur<r.endMins)free.push({s:cur,e:r.endMins});
+        t.innerHTML=free.length?free.map(f=>mStr(f.s)+' – '+mStr(f.e)).join(' &amp; '):(mStr(r.startMins)+' – '+mStr(r.endMins));
+      }
+    }
     if(t.textContent)card.appendChild(t);
+
     card.addEventListener('dragstart',e=>{
       draggingVol=name;e.dataTransfer.setData('text/plain',name);e.dataTransfer.effectAllowed='move';
       setTimeout(()=>{card.classList.add('dragging');highlightDZs(wk,shifts)},0);
@@ -809,18 +925,44 @@ function buildCards(wk,shifts){
   const vols=Object.keys(wkData).filter(n=>!isEmp(n)&&Object.keys(wkData[n].slots||{}).some(k=>k.startsWith(curDay+'_')));
   let anyV=false;
   vols.forEach(name=>{
-    if(isFullyPlaced(name))return;anyV=true;
-    vp.appendChild(makeCard(name,vcols[name]||VCOLS[0],false,volDayRange(wk,name)));
+    const card=makeCard(name,vcols[name]||VCOLS[0],false);
+    if(card){anyV=true;vp.appendChild(card);}
   });
-  if(!anyV)vp.innerHTML='<div class="no-avail" style="color:var(--green)">✓ Tous les bénévoles placés</div>';
+  if(!anyV)vp.innerHTML='<div class="no-avail" style="color:var(--green)">&#10003; Tous les bénévoles placés</div>';
 
-  // Employees — always visible regardless of avail
+  // Employees
   let anyE=false;
   directory.filter(p=>p.type==='emp').forEach(p=>{
-    if(isFullyPlaced(p.name))return;anyE=true;
-    ep.appendChild(makeCard(p.name,EMP_COL,true,null));
+    // Employee is "fully placed" when assigned to all required roles they cover
+    const coverable=shifts.filter(sh=>volCoversShift(wk,p.name,sh));
+    const allPlaced=coverable.length&&coverable.every(sh=>[...sh.roles,...(sh.optional||[])].some(r=>getAssign(wk,sh.id,r)===p.name));
+    if(allPlaced)return;
+    const card=makeCard(p.name,EMP_COL,true);
+    if(card){anyE=true;ep.appendChild(card);}
   });
-  if(!anyE)ep.innerHTML='<div class="no-avail" style="color:var(--green)">✓ Tous les employés placés</div>';
+  if(!anyE)ep.innerHTML='<div class="no-avail" style="color:var(--green)">&#10003; Tous les employés placés</div>';
+}
+
+/* ── Patch drop handler to auto-set overlap times and block double-shift ── */
+function doAssign(wk, shift, role, name){
+  if(isEmp(name)){
+    setAssign(wk,shift.id,role,name);
+    // No time override needed for employees
+  } else {
+    // Block if already assigned to this shift
+    if(volAssignedToShift(wk,name,shift)){
+      alert(name+' est déjà assigné(e) à ce shift.');
+      return false;
+    }
+    const ov=overlapMins(wk,name,shift);
+    if(!ov){
+      alert(name+' n\'est pas disponible sur ce shift.');
+      return false;
+    }
+    setAssign(wk,shift.id,role,name);
+    setAssignTimes(wk,shift.id,role,ov.s,ov.e);
+  }
+  return true;
 }
 
 /* ══ TIME POPOVER ══ */
@@ -865,7 +1007,6 @@ function renderDir(){
       <td><div class="role-tags">${p.roles.filter(Boolean).map(r=>`<span class="role-tag">${r}</span>`).join('')||'<span style="color:var(--text-3);font-size:12px">—</span>'}</div></td>
       <td style="white-space:nowrap;text-align:right">
         <button class="btn btn-sm btn-icon" title="Modifier" onclick="openPersonModal(${p.id})">✏</button>
-        <button class="btn btn-sm btn-icon btn-danger" title="Supprimer" onclick="deletePerson(${p.id})">✕</button>
       </td>`;
     tbody.appendChild(tr);
   });
@@ -891,9 +1032,16 @@ function openPersonModal(id){
   document.getElementById('pm-r1').value=(p&&p.roles[0])||'';
   document.getElementById('pm-r2').value=(p&&p.roles[1])||'';
   document.getElementById('pm-r3').value=(p&&p.roles[2])||'';
+  document.getElementById('pm-delete').style.display=p?'inline-flex':'none';
   document.getElementById('person-overlay').classList.add('open');
 }
 function closePersonModal(){document.getElementById('person-overlay').classList.remove('open');pmCtx=null}
+function deletePersonFromModal(){
+  if(!pmCtx)return;
+  if(!confirm('Supprimer cette personne ?'))return;
+  directory=directory.filter(p=>p.id!==pmCtx);
+  rebuildVcols();populateVolSelect();renderDir();closePersonModal();
+}
 function savePerson(){
   const name=document.getElementById('pm-name').value.trim();
   if(!name){alert('Le nom est requis.');return}
@@ -969,7 +1117,19 @@ function sendCurrent(){
 
 /* ══ INIT ══ */
 initTestData();
+(function(){
+  const wk=wkey(bMon);
+  const wkAvail=avail[wk]||{};
+})();
 renderB();
+// Hide org tab if not unlocked
+if(!orgUnlocked){
+  document.querySelector('.main-tab:last-child').style.display='none';
+} else {
+  // If arriving via secret link, switch directly to org view
+  const orgBtn=document.querySelector('.main-tab:last-child');
+  switchMain('organisatrice',orgBtn);
+}
 </script>
 </body>
 </html>
