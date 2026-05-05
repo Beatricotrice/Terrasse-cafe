@@ -84,7 +84,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .h-grid{display:inline-block;min-width:100%;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
 .h-head-row{display:flex;border-bottom:1px solid var(--border)}
 .h-corner{width:var(--role-col);min-width:var(--role-col);flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);padding:8px 12px;font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:flex-end}
-.h-times{flex:1;background:var(--bg);position:relative;height:36px}
+.h-times{flex-shrink:0;background:var(--bg);position:relative;height:36px}
 .h-tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--border-light);display:flex;align-items:flex-end;padding-bottom:5px;padding-left:4px;font-size:10px;font-family:var(--mono);color:var(--text-3)}
 .h-tick.hour{border-left-color:var(--border);color:var(--text-2);font-weight:500}
 .h-shift-row{display:flex;background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border-light)}
@@ -108,7 +108,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .avail-chip:hover{filter:brightness(.9)}
 .avail-chip-inner{display:flex;align-items:center;gap:4px;width:100%;overflow:hidden}
 .chip-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
-.chip-x{cursor:pointer;font-size:14px;opacity:.4;line-height:1;flex-shrink:0;transition:opacity .1s}
+.chip-time{font-size:10px;font-family:var(--mono);opacity:.55;white-space:nowrap;flex-shrink:0;margin-left:4px}
+.chip-x{cursor:pointer;font-size:18px;opacity:.35;line-height:1;flex-shrink:0;transition:opacity .1s;padding:0 2px;margin-left:2px}
 .chip-x:hover{opacity:1}
 .emp-badge{font-size:9px;font-weight:700;letter-spacing:.05em;padding:1px 4px;border-radius:3px;flex-shrink:0;border:1px solid currentColor;opacity:.75}
 /* progress */
@@ -206,22 +207,30 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- ═══ BÉNÉVOLE ═══ -->
 <div id="pane-benevole" class="pane visible">
-  <div class="topbar">
-    <select id="vol-select" style="width:200px" onchange="onVolSelect()">
-      <option value="">— Mon nom —</option>
-    </select>
-    <input type="email" id="vol-email" placeholder="Mon courriel" style="width:210px" oninput="onVolEmailChange()"/>
-    <div class="week-nav">
-      <button class="wbtn" onclick="bShift(-1)">&#8592;</button>
-      <span class="wlabel" id="b-wlabel">—</span>
-      <button class="wbtn" onclick="bShift(1)">&#8594;</button>
+  <div style="max-width:680px">
+    <div style="margin-bottom:1.25rem">
+      <select id="vol-select" style="width:240px;font-size:14px;padding:9px 36px 9px 12px" onchange="onVolSelect()">
+        <option value="">— Mon nom —</option>
+      </select>
     </div>
-  </div>
-  <div class="b-days-wrap" id="b-days-wrap"></div>
-  <div class="b-summary" id="b-summary"></div>
-  <div class="b-actions">
-    <button class="btn btn-primary" onclick="submitAvail()">Envoyer mes disponibilités</button>
-    <button class="btn btn-sm" onclick="clearBSel()">Effacer tout</button>
+    <div id="b-week-section" style="display:none">
+      <div class="week-nav" style="margin-bottom:1.25rem">
+        <button class="wbtn" onclick="bShift(-1)">&#8592;</button>
+        <span class="wlabel" id="b-wlabel">—</span>
+        <button class="wbtn" onclick="bShift(1)">&#8594;</button>
+      </div>
+      <div class="b-days-wrap" id="b-days-wrap"></div>
+      <div class="b-summary" id="b-summary"></div>
+      <div id="b-email-section" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light)">
+        <label style="display:block;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Courriel de notification</label>
+        <input type="email" id="vol-email" placeholder="prenom@exemple.com" style="width:260px;font-size:13px" oninput="onVolEmailChange()"/>
+        <div style="font-size:11px;color:var(--text-3);margin-top:5px">Vous serez notifié(e) à cette adresse quand l'horaire sera confirmé.</div>
+      </div>
+      <div class="b-actions" style="margin-top:1rem">
+        <button class="btn btn-primary" onclick="submitAvail()">Envoyer mes disponibilités</button>
+        <button class="btn btn-sm" onclick="clearBSel()">Effacer tout</button>
+      </div>
+    </div>
   </div>
   <div class="toast" id="b-toast">&#10003; Disponibilités enregistrées. Merci !</div>
 </div>
@@ -243,6 +252,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <button class="wbtn" onclick="oShift(1)">&#8594;</button>
       </div>
       <span class="pill" id="o-stat">—</span>
+      <button class="btn btn-sm" id="auto-btn" onclick="openAutoAssign()" style="display:flex;align-items:center;gap:5px">⚡ Assignation auto</button>
       <button class="btn btn-green btn-sm" onclick="openNotify()">✉ Notifier les bénévoles</button>
     </div>
     <div class="day-tabs" id="o-daytabs"></div>
@@ -344,6 +354,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
 </div>
 
+
+
 <script>
 /* ══ CONSTANTS ══ */
 const DAYS=[
@@ -406,6 +418,8 @@ function mins2t(m){return pad2(Math.floor(m/60))+':'+pad2(m%60)}
 function t2mins(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function getPerson(name){return directory.find(p=>p.name===name)}
 function isEmp(name){const p=getPerson(name);return!!(p&&p.type==='emp')}
+function curDayDate(){const day=DAYS.find(d=>d.id===curDay);return dayDate(oMon,day.dow)}
+function isPastDay(){const d=curDayDate();const today=new Date();today.setHours(0,0,0,0);return d<today;}
 
 /* ══ TEST DATA ══ */
 function makeSlots(dayId,sH,sM,eH,eM){
@@ -491,7 +505,10 @@ function populateVolSelect(){
 function onVolSelect(){
   const name=document.getElementById('vol-select').value;
   const p=getPerson(name);
+  const weekSection=document.getElementById('b-week-section');
+  weekSection.style.display=name?'block':'none';
   document.getElementById('vol-email').value=p?p.email:'';
+  if(name)renderB();
 }
 function onVolEmailChange(){
   const name=document.getElementById('vol-select').value;
@@ -726,27 +743,33 @@ function renderHoraire(){
   document.getElementById('h-day-lbl').textContent=day.label;
 
   const dSH=day.oH+day.oM/60;
-  const dEH=21;
+  const dEH=shifts.length?Math.max(...shifts.map(s=>s.toH)):day.cH+day.cM/60;
   const numSlots=Math.round((dEH-dSH)*2);
 
   // Measure available width for the timeline (container minus role col)
   const hScroll=document.querySelector('.h-scroll');
-  const availW=(hScroll?hScroll.clientWidth:800)-parseInt(getComputedStyle(document.documentElement).getPropertyValue('--role-col')||'165');
+  const roleColW=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--role-col')||'165');
+  const scrollW=hScroll?hScroll.clientWidth:800;
+  const availW=Math.max(scrollW-roleColW, numSlots*28); // min 28px per slot
   const dynCOL=Math.floor(availW/numSlots);
   const TW=dynCOL*numSlots;
 
   function toPx(h){return Math.round((h-dSH)*2*dynCOL);}
 
+  const past=isPastDay();
+  // Update auto-assign button state
+  const autoBtn=document.getElementById('auto-btn');
+  if(autoBtn){autoBtn.disabled=past;autoBtn.style.opacity=past?'0.4':'1';autoBtn.title=past?'Journée passée — lecture seule':'';}
   const grid=document.getElementById('h-grid');grid.innerHTML='';
+
 
   /* header — one tick per slot at left edge */
   const hRow=document.createElement('div');hRow.className='h-head-row';
   const corn=document.createElement('div');corn.className='h-corner';corn.textContent='Rôle';hRow.appendChild(corn);
   const times=document.createElement('div');times.className='h-times';times.style.width=times.style.minWidth=TW+'px';
-  for(let i=0;i<=numSlots;i++){
-    const mins=(dSH*60)+(i*30);
-    const hh=Math.floor(mins/60),mm=mins%60;
-    if(hh>21||(hh===21&&mm>0))break;
+  for(let i=0;i<numSlots;i++){
+    const totalMins=Math.round(dSH*60)+(i*30);
+    const hh=Math.floor(totalMins/60),mm=totalMins%60;
     const isHour=mm===0;
     const t=document.createElement('div');t.className='h-tick'+(isHour?' hour':'');
     t.style.left=(i*dynCOL)+'px';
@@ -807,37 +830,44 @@ function renderHoraire(){
         const inner=document.createElement('div');inner.className='avail-chip-inner';
         if(emp){const b=document.createElement('span');b.className='emp-badge';b.style.color=col.fg;b.textContent='EMP';inner.appendChild(b);}
         const nm=document.createElement('span');nm.className='chip-name';nm.style.color=col.fg;nm.textContent=assigned;inner.appendChild(nm);
+        if(!emp){const ct2=getAssignTimes(wk,shift.id,role);const rng2=volDayRange(wk,assigned);const sm=ct2?ct2.s:(rng2?Math.max(rng2.startMins,shift.fromH*60):shift.fromH*60);const em2=ct2?ct2.e:(rng2?Math.min(rng2.endMins,shift.toH*60):shift.toH*60);const tm=document.createElement('span');tm.className='chip-time';tm.style.color=col.fg;tm.textContent=mStr(sm)+'–'+mStr(em2);inner.appendChild(tm);}
         const x=document.createElement('span');x.className='chip-x';x.style.color=col.fg;x.textContent='×';
-        x.addEventListener('click',ev=>{ev.stopPropagation();setAssign(wk,shift.id,role,null);renderHoraire()});
+        if(!past)x.addEventListener('click',ev=>{ev.stopPropagation();setAssign(wk,shift.id,role,null);renderHoraire();});
+        else{x.style.display='none';}
         inner.appendChild(x);chip.appendChild(inner);
-        if(!emp)chip.addEventListener('click',ev=>{if(ev.target===x)return;openTP(ev,assigned,shift.id,role,shift,wk)});
+        if(!emp&&!past)chip.addEventListener('click',ev=>{if(ev.target===x)return;openTP(ev,assigned,shift.id,role,shift,wk)});
         dz.appendChild(chip);
 
         // replacement drop
-        dz.addEventListener('dragover',e=>{
-          if(!draggingVol||!volCoversShift(wk,draggingVol,shift))return;
-          if(!isEmp(draggingVol)&&volAssignedToShift(wk,draggingVol,shift)&&getAssign(wk,shift.id,role)!==draggingVol)return;
-          e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');
-        });
-        dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
-        dz.addEventListener('drop',e=>{
-          dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
-          if(!name||!volCoversShift(wk,name,shift))return;
-          e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
-        });
+        if(!past){
+          dz.addEventListener('dragover',e=>{
+            if(!draggingVol||!volCoversShift(wk,draggingVol,shift))return;
+            if(!isEmp(draggingVol)&&volAssignedToShift(wk,draggingVol,shift)&&getAssign(wk,shift.id,role)!==draggingVol)return;
+            e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');
+          });
+          dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
+          dz.addEventListener('drop',e=>{
+            dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
+            if(!name||!volCoversShift(wk,name,shift))return;
+            e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
+          });
+        }
       } else {
         dz.classList.add('empty');
-        const ph=document.createElement('span');ph.className='dz-ph';ph.textContent='— glissez ici';dz.appendChild(ph);
-        dz.addEventListener('dragover',e=>{
-          if(draggingVol&&volCoversShift(wk,draggingVol,shift)&&(!isEmp(draggingVol)?!volAssignedToShift(wk,draggingVol,shift):true)){e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');}
-          else e.dataTransfer.dropEffect='none';
-        });
-        dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
-        dz.addEventListener('drop',e=>{
-          dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
-          if(!name||!volCoversShift(wk,name,shift))return;
-          e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
-        });
+        const ph=document.createElement('span');ph.className='dz-ph';
+        ph.textContent=past?'—':'— glissez ici';dz.appendChild(ph);
+        if(!past){
+          dz.addEventListener('dragover',e=>{
+            if(draggingVol&&volCoversShift(wk,draggingVol,shift)&&(!isEmp(draggingVol)?!volAssignedToShift(wk,draggingVol,shift):true)){e.preventDefault();e.dataTransfer.dropEffect='move';dz.classList.add('dok');}
+            else e.dataTransfer.dropEffect='none';
+          });
+          dz.addEventListener('dragleave',()=>dz.classList.remove('dok'));
+          dz.addEventListener('drop',e=>{
+            dz.classList.remove('dok');const name=e.dataTransfer.getData('text/plain');
+            if(!name||!volCoversShift(wk,name,shift))return;
+            e.preventDefault();if(doAssign(wk,shift,role,name))renderHoraire();
+          });
+        }
       }
       tl.appendChild(dz);row.appendChild(tl);grid.appendChild(row);
     });
@@ -913,7 +943,7 @@ function buildCards(wk,shifts){
 
     const card=document.createElement('div');
     card.className='vol-card'+(emp?' emp-card':'');
-    card.draggable=true;card.style.background=col.bg;card.style.borderColor=col.fg+(emp?'':'60');
+    const isPast_=isPastDay();card.draggable=!isPast_;if(isPast_)card.style.cursor='default';card.style.background=col.bg;card.style.borderColor=col.fg+(emp?'':'60');
 
     const nm=document.createElement('div');nm.className='vc-name';nm.style.color=col.fg;
     if(emp){nm.innerHTML=`<span class="emp-badge" style="color:${col.fg};margin-right:5px">EMP</span>${name}`;}
@@ -1005,7 +1035,6 @@ function doAssign(wk, shift, role, name){
 
 /* ══ TIME POPOVER ══ */
 function openTP(e, name, sid, role, shift, wk) {
-  e.stopPropagation();
   tpCtx = { name, sid, role, shift, wk };
 
   document.getElementById('tp-name').textContent = name;
@@ -1048,11 +1077,13 @@ function openTP(e, name, sid, role, shift, wk) {
 
   const pop = document.getElementById('time-pop');
   pop.classList.add('open');
-  const rect = e.currentTarget.getBoundingClientRect();
-  let left = rect.right + 8;
-  if (left + 250 > window.innerWidth) left = rect.left - 258;
+  const popW = 248, popH = 210;
+  let left = e.clientX + 10;
+  let top = e.clientY - 10;
+  if(left + popW > window.innerWidth - 8) left = e.clientX - popW - 10;
+  if(top + popH > window.innerHeight - 8) top = window.innerHeight - popH - 8;
   pop.style.left = Math.max(8, left) + 'px';
-  pop.style.top = Math.min(rect.top, window.innerHeight - 220) + 'px';
+  pop.style.top = Math.max(8, top) + 'px';
 }
 function closeTP(){document.getElementById('time-pop').classList.remove('open');tpCtx=null}
 function saveTP() {
@@ -1073,8 +1104,8 @@ function saveTP() {
 function removeAssignTP(){if(!tpCtx)return;setAssign(tpCtx.wk,tpCtx.sid,tpCtx.role,null);closeTP();renderHoraire()}
 document.addEventListener('click',e=>{
   const tp=document.getElementById('time-pop');
-  if(tp.classList.contains('open')&&!tp.contains(e.target))closeTP();
-});
+  if(tp.classList.contains('open')&&!tp.contains(e.target)){closeTP();}
+},true); // capture phase so stopPropagation in chips doesn't block it
 
 /* ══ RÉPERTOIRE ══ */
 function renderDir(){
@@ -1094,12 +1125,31 @@ function renderDir(){
   document.getElementById('dir-count').textContent=directory.length+' personne'+(directory.length!==1?'s':'');
 }
 
-function fillRoleSelects(){
-  ['pm-r1','pm-r2','pm-r3'].forEach(id=>{
-    const sel=document.getElementById(id),cur=sel.value;
-    sel.innerHTML='<option value="">— Aucun —</option>';
-    ALL_ROLES.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o)});
-    if(cur)sel.value=cur;
+function fillRoleSelects(vals){
+  const ids=['pm-r1','pm-r2','pm-r3'];
+  // Build each select fresh, graying out roles chosen in the other two
+  ids.forEach((id,i)=>{
+    const sel=document.getElementById(id);
+    const myVal=vals?vals[i]:'';
+    const others=ids.filter((_,j)=>j!==i).map((_,k)=>vals?vals[[0,1,2].filter(x=>x!==i)[k]]:'').filter(Boolean);
+    // Remove all options except first blank one, then repopulate
+    while(sel.options.length>1) sel.remove(1);
+    ALL_ROLES.forEach(r=>{
+      const o=document.createElement('option');
+      o.value=r; o.textContent=r;
+      if(others.includes(r)){o.disabled=true; o.style.color='#A8A29E';}
+      sel.appendChild(o);
+    });
+    sel.value=myVal;
+  });
+}
+function initRoleSelectListeners(){
+  const ids=['pm-r1','pm-r2','pm-r3'];
+  ids.forEach(id=>{
+    document.getElementById(id).addEventListener('change',()=>{
+      const cur=ids.map(i=>document.getElementById(i).value);
+      fillRoleSelects(cur);
+    });
   });
 }
 function openPersonModal(id){
@@ -1109,10 +1159,11 @@ function openPersonModal(id){
   document.getElementById('pm-name').value=p?p.name:'';
   document.getElementById('pm-email').value=p?p.email:'';
   document.getElementById('pm-type').value=p?p.type:'vol';
-  fillRoleSelects();
-  document.getElementById('pm-r1').value=(p&&p.roles[0])||'';
-  document.getElementById('pm-r2').value=(p&&p.roles[1])||'';
-  document.getElementById('pm-r3').value=(p&&p.roles[2])||'';
+  const vals=[(p&&p.roles[0])||'',(p&&p.roles[1])||'',(p&&p.roles[2])||''];
+  // Reset selects to blank first so repopulation starts clean
+  ['pm-r1','pm-r2','pm-r3'].forEach(id=>{document.getElementById(id).innerHTML='<option value="">— Aucun —</option>';});
+  fillRoleSelects(vals);
+  initRoleSelectListeners();
   document.getElementById('pm-delete').style.display=p?'inline-flex':'none';
   document.getElementById('person-overlay').classList.add('open');
 }
@@ -1195,6 +1246,111 @@ function sendCurrent(){
   if(emailIdx<emailList.length-1){emailIdx++;renderEmailPreview();}
   else alert('Tous les courriels ont été ouverts dans Gmail.');
 }
+
+
+/* ══ AUTO-ASSIGN ══ */
+
+// Local versions that take dayId explicitly (avoid curDay global dependency)
+function volDayRangeFor(wk, name, dayId){
+  const slots = ((avail[wk]||{})[name]||{}).slots || {};
+  const day = DAYS.find(d => d.id === dayId);
+  if(!day) return null;
+  const openS = Math.round((day.oH*60+day.oM - GSH*60) / 30);
+  const closeS = Math.round((day.cH*60+day.cM - GSH*60) / 30);
+  let first = null, last = null;
+  for(let s = openS; s < closeS; s++){
+    if(slots[skey(dayId, s)]){ if(first===null) first=s; last=s+1; }
+  }
+  if(first === null) return null;
+  return { startMins: GSH*60 + first*30, endMins: GSH*60 + last*30 };
+}
+
+function overlapFor(wk, name, shift, dayId){
+  const r = volDayRangeFor(wk, name, dayId);
+  if(!r) return null;
+  const s = Math.max(r.startMins, shift.fromH*60);
+  const e = Math.min(r.endMins, shift.toH*60);
+  if(e <= s) return null;
+  return { s: s, e: e };
+}
+
+function volCoversShiftFor(wk, name, shift, dayId){
+  if(isEmp(name)) return true;
+  const r = volDayRangeFor(wk, name, dayId);
+  return r && r.startMins < shift.toH*60 && r.endMins > shift.fromH*60;
+}
+
+function openAutoAssign(){
+  if(isPastDay()){alert('Journée passée — impossible de modifier l\'horaire.');return;}
+  const wk = wkey(oMon);
+  const dayId = curDay;
+  const wkData = avail[wk] || {};
+
+  // Current day only: find available vols, score and assign greedily
+  const tempAssigned = {}; // "name|dayId" -> [shiftId] to prevent double-shift
+
+  function alreadyInShift(name, dayId, shiftId){
+    return (tempAssigned[name+'|'+dayId]||[]).includes(shiftId);
+  }
+  function markAssigned(name, dayId, shiftId){
+    if(!tempAssigned[name+'|'+dayId]) tempAssigned[name+'|'+dayId] = [];
+    tempAssigned[name+'|'+dayId].push(shiftId);
+  }
+  function scoreVol(name, role, shift, dayId){
+    const p = getPerson(name); if(!p) return 0;
+    const prioIdx = p.roles.indexOf(role);
+    let score = 0;
+    if(prioIdx === 0) score += 30;
+    else if(prioIdx === 1) score += 20;
+    else if(prioIdx === 2) score += 10;
+    else score += 2;
+    const ov = overlapFor(wk, name, shift, dayId);
+    if(ov) score += Math.round((ov.e - ov.s) / 30);
+    return score;
+  }
+
+  // Pre-populate tempAssigned from existing assignments on this day (don't overwrite)
+  const shifts = SHIFTS[dayId] || [];
+  shifts.forEach(function(sh){
+    [...sh.roles,...(sh.optional||[])].forEach(function(role){
+      const existing = getAssign(wk, sh.id, role);
+      if(existing) markAssigned(existing, dayId, sh.id);
+    });
+  });
+
+  // Volunteers available on this day
+  const availVols = Object.keys(wkData).filter(function(name){
+    return !isEmp(name) &&
+      Object.keys(wkData[name].slots||{}).some(function(k){ return k.startsWith(dayId+'_'); });
+  });
+
+  shifts.forEach(function(shift){
+    [...shift.roles, ...(shift.optional||[])].forEach(function(role){
+      if(getAssign(wk, shift.id, role)) return; // already assigned, skip
+
+      const candidates = availVols
+        .filter(function(name){
+          if(alreadyInShift(name, dayId, shift.id)) return false;
+          return volCoversShiftFor(wk, name, shift, dayId);
+        })
+        .map(function(name){ return { name: name, score: scoreVol(name, role, shift, dayId) }; })
+        .sort(function(a, b){ return b.score - a.score; });
+
+      if(!candidates.length) return;
+
+      const best = candidates[0];
+      const ov = overlapFor(wk, best.name, shift, dayId);
+      if(!ov) return;
+
+      setAssign(wk, shift.id, role, best.name);
+      setAssignTimes(wk, shift.id, role, ov.s, ov.e);
+      markAssigned(best.name, dayId, shift.id);
+    });
+  });
+
+  renderHoraire();
+}
+
 
 /* ══ INIT ══ */
 initTestData();
