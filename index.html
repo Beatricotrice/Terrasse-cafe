@@ -548,77 +548,77 @@ function renderB(){
   wrap.innerHTML='';
 
   DAYS.forEach(day=>{
-    const dayData=bSel[wk][day.id]||null;
-    const enabled=!!(dayData);
+    const dayData = bSel[wk][day.id] || null;
+    const enabled = !!(dayData);
 
-    const card=document.createElement('div');
-    card.className='b-day-card'+(enabled?' active':'');
+    const card = document.createElement('div');
+    card.className = 'b-day-card' + (enabled ? ' active' : '');
 
-    // Head row
-    const head=document.createElement('div');
-    head.className='b-day-card-head';
+    // Entête de la carte
+    const head = document.createElement('div');
+    head.className = 'b-day-card-head';
+    const title = document.createElement('div');
+    title.className = 'b-day-card-title';
+    title.innerHTML = day.label + ' <span>' + fmt(dayDate(bMon, day.dow)) + '</span>';
 
-    const title=document.createElement('div');
-    title.className='b-day-card-title';
-    title.innerHTML=day.label+' <span>'+fmt(dayDate(bMon,day.dow))+'</span>';
-
-    // Toggle
-    const toggleLabel=document.createElement('label');
-    toggleLabel.className='b-toggle';
-    const chk=document.createElement('input');
-    chk.type='checkbox';chk.checked=enabled;
-    const track=document.createElement('span');track.className='b-toggle-track';
-    const thumb=document.createElement('span');thumb.className='b-toggle-thumb';
-    toggleLabel.appendChild(chk);toggleLabel.appendChild(track);toggleLabel.appendChild(thumb);
-
-    head.appendChild(title);head.appendChild(toggleLabel);
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'b-toggle';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox'; chk.checked = enabled;
+    const track = document.createElement('span'); track.className = 'b-toggle-track';
+    const thumb = document.createElement('span'); thumb.className = 'b-toggle-thumb';
+    toggleLabel.appendChild(chk); toggleLabel.appendChild(track); toggleLabel.appendChild(thumb);
+    head.appendChild(title); head.appendChild(toggleLabel);
     card.appendChild(head);
 
-    // Body (time selects)
-    const body=document.createElement('div');
-    body.className='b-day-card-body';
-    body.style.display=enabled?'grid':'none';
+    // Corps de la carte (Sélecteurs)
+    const body = document.createElement('div');
+    body.className = 'b-day-card-body';
+    body.style.display = enabled ? 'grid' : 'none';
 
-    const fromField=document.createElement('div');fromField.className='b-field';
-    const fromLabel=document.createElement('label');fromLabel.textContent='DE';
-    const fromSel=buildTimeSelect(day,'from',dayData?dayData.from:undefined);
-    fromField.appendChild(fromLabel);fromField.appendChild(fromSel);
+    const fromField = document.createElement('div'); fromField.className = 'b-field';
+    fromField.innerHTML = '<label>DE</label>';
+    let fromSel = buildTimeSelect(day, 'from', dayData ? dayData.from : undefined);
+    fromField.appendChild(fromSel);
 
-    const toField=document.createElement('div');toField.className='b-field';
-    const toLabel=document.createElement('label');toLabel.textContent='À';
-    const toSel=buildTimeSelect(day,'to',dayData?dayData.to:undefined);
-    toField.appendChild(toLabel);toField.appendChild(toSel);
+    const toField = document.createElement('div'); toField.className = 'b-field';
+    toField.innerHTML = '<label>À</label>';
+    let toSel = buildTimeSelect(day, 'to', dayData ? dayData.to : undefined, dayData ? dayData.from : undefined);
+    toField.appendChild(toSel);
 
-    body.appendChild(fromField);body.appendChild(toField);
+    body.appendChild(fromField); body.appendChild(toField);
     card.appendChild(body);
 
-    // Events
-    function saveDay(){
-      bSel[wk][day.id]={from:parseInt(fromSel.value),to:parseInt(toSel.value)};
+    // --- LA LOGIQUE DE MISE À JOUR ---
+    function saveDay() {
+      bSel[wk][day.id] = { from: parseInt(fromSel.value), to: parseInt(toSel.value) };
       updateBSummary();
     }
-    function syncToMin(){
-      // ensure 'to' > 'from'
-      if(parseInt(toSel.value)<=parseInt(fromSel.value)){
-        toSel.value=parseInt(fromSel.value)+30;
-      }
+
+    function updateToSelect() {
+      const currentFrom = parseInt(fromSel.value);
+      const currentTo = parseInt(toSel.value);
+      // On crée un nouveau menu "À" avec les options grisées basées sur "DE"
+      const newToSel = buildTimeSelect(day, 'to', currentTo <= currentFrom ? currentFrom + 30 : currentTo, currentFrom);
+      
+      toField.replaceChild(newToSel, toSel); // On remplace l'élément graphiquement
+      toSel = newToSel; 
+      toSel.addEventListener('change', saveDay);
       saveDay();
     }
-    chk.addEventListener('change',()=>{
-      const on=chk.checked;
-      card.classList.toggle('active',on);
-      body.style.display=on?'grid':'none';
-      if(on){saveDay();}
-      else{delete bSel[wk][day.id];updateBSummary();}
+
+    chk.addEventListener('change', () => {
+      const on = chk.checked;
+      card.classList.toggle('active', on);
+      body.style.display = on ? 'grid' : 'none';
+      if (on) { updateToSelect(); }
+      else { delete bSel[wk][day.id]; updateBSummary(); }
     });
-    fromSel.addEventListener('change',syncToMin);
-    toSel.addEventListener('change',saveDay);
 
-    // Init default save if enabled
-    if(enabled&&!bSel[wk][day.id]){saveDay();}
+    fromSel.addEventListener('change', updateToSelect);
+    toSel.addEventListener('change', saveDay);
 
-    wrap.appendChild(card);
-  });
+    wrap.appendChild(card);});
   updateBSummary();
 }
 
