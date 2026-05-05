@@ -179,6 +179,17 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .tp-remove{width:100%;margin-top:6px;padding:4px;border:none;background:none;font-size:11px;color:#DC2626;cursor:pointer}
 .tp-remove:hover{text-decoration:underline}
 
+  .tp-fields select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font); /* Utilise la police standard pour plus de clarté */
+  background: var(--surface);
+  outline: none;
+}
+  
 .test-banner{background:var(--amber-light);border:1px solid #FCD34D;color:var(--amber);padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:1.25rem}
 </style>
 </head>
@@ -983,28 +994,68 @@ function doAssign(wk, shift, role, name){
 }
 
 /* ══ TIME POPOVER ══ */
-function openTP(e,name,sid,role,shift,wk){
-  e.stopPropagation();tpCtx={name,sid,role,shift,wk};
-  document.getElementById('tp-name').textContent=name;
-  document.getElementById('tp-role').textContent=role+' · '+shift.label;
-  const ct=getAssignTimes(wk,sid,role);
-  const rng=volDayRange(wk,name);
-  const ds=rng?Math.max(rng.startMins,shift.fromH*60):shift.fromH*60;
-  const de=rng?Math.min(rng.endMins,shift.toH*60):shift.toH*60;
-  document.getElementById('tp-start').value=mins2t(ct?ct.s:ds);
-  document.getElementById('tp-end').value=mins2t(ct?ct.e:de);
-  const pop=document.getElementById('time-pop');pop.classList.add('open');
-  const rect=e.currentTarget.getBoundingClientRect();
-  let left=rect.right+8;if(left+250>window.innerWidth)left=rect.left-258;
-  pop.style.left=Math.max(8,left)+'px';pop.style.top=Math.min(rect.top,window.innerHeight-220)+'px';
+function openTP(e, name, sid, role, shift, wk) {
+  e.stopPropagation();
+  tpCtx = { name, sid, role, shift, wk };
+
+  document.getElementById('tp-name').textContent = name;
+  document.getElementById('tp-role').textContent = role + ' · ' + shift.label;
+
+  const ct = getAssignTimes(wk, sid, role);
+  const rng = volDayRange(wk, name);
+  const day = DAYS.find(d => d.id === curDay);
+
+  // Valeurs par défaut en minutes (calculées comme dans ton code original)
+  const ds = rng ? Math.max(rng.startMins, shift.fromH * 60) : shift.fromH * 60;
+  const de = rng ? Math.min(rng.endMins, shift.toH * 60) : shift.toH * 60;
+  const startVal = ct ? ct.s : ds;
+  const endVal = ct ? ct.e : de;
+
+  // On cible les div qui contiennent les labels dans .tp-fields[cite: 1]
+  const containers = document.querySelectorAll('.tp-fields > div');
+  
+  // On vide les div et on injecte le label + le select "maison" buildTimeSelect[cite: 1]
+  containers[0].innerHTML = '<label>Début</label>';
+  const sSel = buildTimeSelect(day, 'from', startVal);
+  sSel.id = 'tp-start'; // On garde l'ID pour que saveTP() puisse le trouver
+  containers[0].appendChild(sSel);
+
+  containers[1].innerHTML = '<label>Fin</label>';
+  const eSel = buildTimeSelect(day, 'to', endVal);
+  eSel.id = 'tp-end';
+  containers[1].appendChild(eSel);
+
+  // Synchronisation pour empêcher que la fin soit avant le début
+  sSel.addEventListener('change', () => {
+    if (parseInt(eSel.value) <= parseInt(sSel.value)) {
+      eSel.value = parseInt(sSel.value) + 30;
+    }
+  });
+
+  // Affichage et positionnement du popover[cite: 1]
+  const pop = document.getElementById('time-pop');
+  pop.classList.add('open');
+  const rect = e.currentTarget.getBoundingClientRect();
+  let left = rect.right + 8;
+  if (left + 250 > window.innerWidth) left = rect.left - 258;
+  pop.style.left = Math.max(8, left) + 'px';
+  pop.style.top = Math.min(rect.top, window.innerHeight - 220) + 'px';
 }
 function closeTP(){document.getElementById('time-pop').classList.remove('open');tpCtx=null}
-function saveTP(){
-  if(!tpCtx)return;
-  const s=t2mins(document.getElementById('tp-start').value);
-  const e=t2mins(document.getElementById('tp-end').value);
-  if(e<=s){alert("L'heure de fin doit être après le début.");return}
-  setAssignTimes(tpCtx.wk,tpCtx.sid,tpCtx.role,s,e);closeTP();renderHoraire();
+function saveTP() {
+  if (!tpCtx) return;
+  // ATTENTION : buildTimeSelect utilise des minutes (ex: 660), 
+  // on utilise donc parseInt() au lieu de t2mins()[cite: 1]
+  const s = parseInt(document.getElementById('tp-start').value);
+  const e = parseInt(document.getElementById('tp-end').value);
+  
+  if (e <= s) {
+    alert("L'heure de fin doit être après le début.");
+    return;
+  }
+  setAssignTimes(tpCtx.wk, tpCtx.sid, tpCtx.role, s, e);
+  closeTP();
+  renderHoraire();
 }
 function removeAssignTP(){if(!tpCtx)return;setAssign(tpCtx.wk,tpCtx.sid,tpCtx.role,null);closeTP();renderHoraire()}
 document.addEventListener('click',e=>{
