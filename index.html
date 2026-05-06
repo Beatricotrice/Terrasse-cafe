@@ -208,33 +208,58 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <!-- ═══ BÉNÉVOLE ═══ -->
 <div id="pane-benevole" class="pane visible">
   <div style="max-width:680px">
-    <div style="margin-bottom:1.25rem">
-      <select id="vol-select" style="width:240px;font-size:14px;padding:9px 36px 9px 12px" onchange="onVolSelect()">
-        <option value="">— Mon nom —</option>
+
+    <!-- EMPTY STATE -->
+    <div id="b-empty-state" style="margin-top:3rem;text-align:center;padding:2.5rem 2rem;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:1.25rem;opacity:.85">
+        <rect x="8" y="14" width="48" height="36" rx="5" fill="#FFF7ED" stroke="#E2DDD8" stroke-width="1.5"/>
+        <rect x="14" y="20" width="14" height="3" rx="1.5" fill="#C2410C" opacity=".7"/>
+        <rect x="14" y="27" width="36" height="2" rx="1" fill="#E2DDD8"/>
+        <rect x="14" y="32" width="28" height="2" rx="1" fill="#E2DDD8"/>
+        <rect x="14" y="37" width="32" height="2" rx="1" fill="#E2DDD8"/>
+        <circle cx="46" cy="44" r="10" fill="#C2410C"/>
+        <path d="M46 39v5.5l3 2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Entrez vos disponibilités</div>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:1.5rem;line-height:1.6;max-width:340px;margin-left:auto;margin-right:auto">Sélectionnez votre nom pour indiquer vos disponibilités pour la semaine.</div>
+      <select id="vol-select" style="width:260px;font-size:14px;padding:10px 36px 10px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface)" onchange="onVolSelect()">
+        <option value="">&#8212; Mon nom &#8212;</option>
       </select>
     </div>
-    <div id="b-week-section" style="display:none">
-      <div class="week-nav" style="margin-bottom:1.25rem">
+
+    <!-- AFTER NAME SELECTED -->
+    <div id="b-name-section" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-light)">
+        <div style="font-size:15px;font-weight:600;color:var(--text)" id="b-greeting"></div>
+        <button class="btn btn-sm" onclick="resetVolSelect()" style="margin-left:auto;color:var(--text-3);font-size:12px">Changer</button>
+      </div>
+      <div class="week-nav" style="margin-bottom:1.5rem">
         <button class="wbtn" onclick="bShift(-1)">&#8592;</button>
-        <span class="wlabel" id="b-wlabel">—</span>
+        <span class="wlabel" id="b-wlabel">&#8212;</span>
         <button class="wbtn" onclick="bShift(1)">&#8594;</button>
       </div>
-      <div class="b-days-wrap" id="b-days-wrap"></div>
-      <div class="b-summary" id="b-summary"></div>
-      <div id="b-email-section" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light)">
-        <label style="display:block;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Courriel de notification</label>
-        <input type="email" id="vol-email" placeholder="prenom@exemple.com" style="width:260px;font-size:13px" oninput="onVolEmailChange()"/>
-        <div style="font-size:11px;color:var(--text-3);margin-top:5px">Vous serez notifié(e) à cette adresse quand l'horaire sera confirmé.</div>
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">Combien de quarts souhaitez-vous faire cette semaine ?</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="b-shift-chips"></div>
       </div>
-      <div class="b-actions" style="margin-top:1rem">
+      <div id="b-week-section" style="display:none">
+        <div class="b-days-wrap" id="b-days-wrap"></div>
+        <div class="b-summary" id="b-summary"></div>
+        <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light)">
+          <label style="display:block;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Courriel de notification</label>
+          <input type="email" id="vol-email" placeholder="prenom@exemple.com" style="width:260px;font-size:13px" oninput="onVolEmailChange()"/>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">Vous serez notifié(e) à cette adresse quand l'horaire sera confirmé.</div>
+        </div>
+      </div>
+      <div class="b-actions" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light)">
         <button class="btn btn-primary" onclick="submitAvail()">Envoyer mes disponibilités</button>
-        <button class="btn btn-sm" onclick="clearBSel()">Effacer tout</button>
+        <button class="btn btn-sm" id="b-clear-btn" onclick="clearBSel()" style="display:none">Effacer tout</button>
       </div>
     </div>
-  </div>
-  <div class="toast" id="b-toast">&#10003; Disponibilités enregistrées. Merci !</div>
-</div>
 
+  </div>
+  <div class="toast" id="b-toast">&#10003; Disponibilités enregistrées. Merci !</div>
+</div>
 <!-- ═══ ORGANISATRICE ═══ -->
 <div id="pane-organisatrice" class="pane">
   <div class="test-banner">⚠ Mode test — données fictives pré-chargées. Allez dans Vendredi pour voir le plus de disponibilités.</div>
@@ -369,18 +394,25 @@ const SHIFTS={
   vendredi:[
     {id:'v_j',label:'Jour',fromH:11,toH:17,roles:['Caissier','Barista','Mise en place']},
     {id:'v_s',label:'Soir',fromH:17,toH:21.5,
-     roles:['Caissier','Barista','Préposé remplissage','Préposé vaisselle','Busboy / Busgirl','Pizzaiolo (1)','Pizzaiolo (2)','Préposé à la pâte','Cuisinier (1)','Cuisinier (2)','Préposé à la passe (1)','Préposé à la passe (2)'],
+     roles:['Caissier','Barista','Préposé remplissage','Préposé vaisselle','Busboy / Busgirl','Préposé au service','Pizzaiolo (1)','Pizzaiolo (2)','Préposé à la pâte','Cuisinier (1)','Cuisinier (2)','Préposé à la passe (1)','Préposé à la passe (2)'],
      optional:['Caissier bar','Barmaid']}
   ],
   samedi:[
     {id:'s_j',label:'Jour',fromH:11,toH:17,roles:['Caissier','Barista','Mise en place']},
     {id:'s_s',label:'Soir',fromH:17,toH:21.5,
-     roles:['Caissier','Barista','Préposé remplissage','Préposé vaisselle','Busboy / Busgirl','Pizzaiolo (1)','Pizzaiolo (2)','Cuisinier (1)','Cuisinier (2)','Préposé à la passe (1)','Préposé à la passe (2)'],
+     roles:['Caissier','Barista','Préposé remplissage','Préposé vaisselle','Busboy / Busgirl','Préposé au service','Pizzaiolo (1)','Pizzaiolo (2)','Cuisinier (1)','Cuisinier (2)','Préposé à la passe (1)','Préposé à la passe (2)'],
      optional:['Caissier bar','Barmaid']}
   ],
   dimanche:[{id:'d_j',label:'Jour',fromH:11,toH:17,roles:['Caissier','Barista','Préposé remplissage']}],
 };
 const ALL_ROLES=[...new Set(Object.values(SHIFTS).flat().flatMap(s=>[...s.roles,...(s.optional||[])]))];
+// Display labels: strip trailing (1)/(2) and deduplicate for UI
+function roleLabel(r){return r.replace(/\s*\(\d+\)$/,'');}
+const DISPLAY_ROLES=[...new Set(ALL_ROLES.map(roleLabel))];
+// Map a display label back to its canonical first role key
+function labelToRole(label){return ALL_ROLES.find(r=>roleLabel(r)===label)||label;}
+// Map a canonical role to its display label
+function roleToLabel(r){return roleLabel(r);}
 const VCOLS=[
   {bg:'#DBEAFE',fg:'#1D4ED8'},{bg:'#D1FAE5',fg:'#065F46'},
   {bg:'#FCE7F3',fg:'#9D174D'},{bg:'#FEF3C7',fg:'#92400E'},
@@ -435,15 +467,24 @@ function merge(...o){const r={};o.forEach(x=>Object.assign(r,x));return r}
 
 function initTestData(){
   const people=[
-    {name:'Béatrice Lamy', email:'bea@example.com',   type:'vol',roles:['Barista','Caissier','Mise en place']},
-    {name:'Marc Dubois',   email:'marc@example.com',   type:'vol',roles:['Pizzaiolo (1)','Cuisinier (1)','Préposé vaisselle']},
-    {name:'Sonia Perreault',email:'sonia@example.com', type:'vol',roles:['Caissier','Barista','Busboy / Busgirl']},
-    {name:'Karim Ayad',    email:'karim@example.com',  type:'vol',roles:['Pizzaiolo (2)','Cuisinier (2)','Préposé remplissage']},
-    {name:'Léa Fontaine',  email:'lea@example.com',    type:'vol',roles:['Mise en place','Barista','']},
-    {name:'Omar Saïd',     email:'omar@example.com',   type:'vol',roles:['Préposé vaisselle','Busboy / Busgirl','']},
-    {name:'Fatima Ndiaye', email:'fatima@example.com', type:'vol',roles:['Caissier','Mise en place','']},
-    {name:'Julie Martin',  email:'julie@example.com',  type:'emp',roles:['Caissier','Barista','Pizzaiolo (1)']},
-    {name:'Thomas Roy',    email:'thomas@example.com', type:'emp',roles:['Cuisinier (1)','Pizzaiolo (2)','Préposé à la passe (1)']},
+    {name:'Yasmine',   email:'yasmine@example.com',   type:'emp', roles:['Caissier','','']},
+    {name:'Aliyah',    email:'aliyah@example.com',    type:'emp', roles:['Barista','Caissier','']},
+    {name:'Yano',      email:'yano@example.com',      type:'vol', roles:['Pizzaiolo (1)','','']},
+    {name:'Béatrice',  email:'beatrice@example.com',  type:'vol', roles:['Préposé à la pâte','','']},
+    {name:'Mariane',   email:'mariane@example.com',   type:'emp', roles:['Cuisinier (1)','Préposé à la passe (1)','']},
+    {name:'Pierrette', email:'pierrette@example.com', type:'vol', roles:['Cuisinier (1)','','']},
+    {name:'Pierre',    email:'pierre@example.com',    type:'vol', roles:['Pizzaiolo (1)','','']},
+    {name:'Thomas',    email:'thomas@example.com',    type:'emp', roles:['Préposé au service','Préposé à la passe (1)','Busboy / Busgirl']},
+    {name:'Yosselyn',  email:'yosselyn@example.com',  type:'emp', roles:['Cuisinier (1)','Mise en place','Préposé à la passe (1)']},
+    {name:'Sylvie',    email:'sylvie@example.com',    type:'vol', roles:['Préposé à la passe (1)','','']},
+    {name:'Kevin',     email:'kevin@example.com',     type:'vol', roles:['','','']},
+    {name:'Marta',     email:'marta@example.com',     type:'vol', roles:['Préposé à la passe (1)','Caissier','']},
+    {name:'Grace',     email:'grace@example.com',     type:'emp', roles:['','','']},
+    {name:'France',    email:'france@example.com',    type:'vol', roles:['','','']},
+    {name:'Anne',      email:'anne@example.com',      type:'vol', roles:['','','']},
+    {name:'Amanda',    email:'amanda@example.com',    type:'vol', roles:['','','']},
+    {name:'Geneviève', email:'genevieve@example.com', type:'vol', roles:['','','']},
+    {name:'Bethan',    email:'bethan@example.com',    type:'vol', roles:['','','']},
   ];
   people.forEach(p=>directory.push({id:nextId++,...p}));
   const wk=wkey(bMon);
@@ -502,13 +543,57 @@ function populateVolSelect(){
   });
   if(cur)sel.value=cur;
 }
+let bShiftsDesired=0;
+const bShiftMemory={}; // name -> last chosen value
+const SHIFT_OPTIONS=[
+  {value:0,label:'Aucun'},
+  {value:1,label:'1'},
+  {value:2,label:'2'},
+  {value:3,label:'3'},
+  {value:99,label:'Ca ne me dérange pas'},
+];
+function buildShiftChips(){
+  const wrap=document.getElementById('b-shift-chips');
+  wrap.innerHTML='';
+  SHIFT_OPTIONS.forEach(opt=>{
+    const btn=document.createElement('button');
+    const active=bShiftsDesired===opt.value;
+    btn.textContent=opt.label;
+    btn.style.cssText='padding:8px 18px;border-radius:20px;border:1.5px solid '+(active?'var(--accent)':'var(--border)')+';background:'+(active?'var(--accent-light)':'var(--surface)')+';color:'+(active?'var(--accent)':'var(--text-2)')+';font-size:13px;font-weight:'+(active?'600':'400')+';cursor:pointer;transition:all .12s;font-family:var(--font)';
+    btn.onclick=()=>{
+      const name=document.getElementById('vol-select').value;
+      bShiftsDesired=opt.value;
+      if(name)bShiftMemory[name]=opt.value;
+      buildShiftChips();
+      const showWeek=opt.value!==0;
+      document.getElementById('b-week-section').style.display=showWeek?'block':'none';
+      document.getElementById('b-clear-btn').style.display=showWeek?'':' none';
+      if(showWeek)renderB();
+    };
+    wrap.appendChild(btn);
+  });
+}
 function onVolSelect(){
   const name=document.getElementById('vol-select').value;
+  if(!name)return;
   const p=getPerson(name);
-  const weekSection=document.getElementById('b-week-section');
-  weekSection.style.display=name?'block':'none';
+  document.getElementById('b-empty-state').style.display='none';
+  document.getElementById('b-name-section').style.display='block';
+  document.getElementById('b-greeting').textContent='Bonjour, '+name.split(' ')[0]+' 👋';
   document.getElementById('vol-email').value=p?p.email:'';
-  if(name)renderB();
+  bShiftsDesired=bShiftMemory[name]!==undefined?bShiftMemory[name]:0;
+  document.getElementById('b-wlabel').textContent=wlabel(bMon);
+  buildShiftChips();
+  const showWeek=bShiftsDesired!==0;
+  document.getElementById('b-week-section').style.display=showWeek?'block':'none';
+  document.getElementById('b-clear-btn').style.display=showWeek?'':'none';
+  if(showWeek)renderB();
+}
+function resetVolSelect(){
+  document.getElementById('vol-select').value='';
+  document.getElementById('b-empty-state').style.display='block';
+  document.getElementById('b-name-section').style.display='none';
+  bShiftsDesired=0;
 }
 function onVolEmailChange(){
   const name=document.getElementById('vol-select').value;
@@ -1127,20 +1212,22 @@ function renderDir(){
 
 function fillRoleSelects(vals){
   const ids=['pm-r1','pm-r2','pm-r3'];
-  // Build each select fresh, graying out roles chosen in the other two
+  // Convert stored canonical values to display labels for comparison
+  const valLabels=vals?vals.map(v=>v?roleToLabel(v):''):['','',''];
   ids.forEach((id,i)=>{
     const sel=document.getElementById(id);
-    const myVal=vals?vals[i]:'';
-    const others=ids.filter((_,j)=>j!==i).map((_,k)=>vals?vals[[0,1,2].filter(x=>x!==i)[k]]:'').filter(Boolean);
-    // Remove all options except first blank one, then repopulate
+    const myLabel=valLabels[i];
+    const otherLabels=ids.filter((_,j)=>j!==i).map((_,k)=>valLabels[[0,1,2].filter(x=>x!==i)[k]]).filter(Boolean);
     while(sel.options.length>1) sel.remove(1);
-    ALL_ROLES.forEach(r=>{
+    DISPLAY_ROLES.forEach(label=>{
       const o=document.createElement('option');
-      o.value=r; o.textContent=r;
-      if(others.includes(r)){o.disabled=true; o.style.color='#A8A29E';}
+      o.value=labelToRole(label); // store canonical role as value
+      o.textContent=label;
+      if(otherLabels.includes(label)){o.disabled=true; o.style.color='#A8A29E';}
       sel.appendChild(o);
     });
-    sel.value=myVal;
+    // Restore selection by canonical value
+    sel.value=vals?vals[i]:'';
   });
 }
 function initRoleSelectListeners(){
