@@ -1465,8 +1465,8 @@ window.addEventListener('resize',()=>{
         nom: document.getElementById('vol-select').value,
         jour: "Lundi", // Dynamique selon le toggle
         dispo: document.getElementById('b-week-section').checked,
-        heureDebut: document.getElementById('b-days-wrap').value,
-        heureFin: document.getElementById('b-summary').value
+        heureDebut: document.getElementById('tp-start').value,
+        heureFin: document.getElementById('tp-end').value
     };
 
     // 2. On envoie l'objet JSON à l'URL de votre déploiement Google Apps Script
@@ -1485,7 +1485,7 @@ window.addEventListener('resize',()=>{
 }
 
 async function chargerCalendrier() {
-    const urlScript = "VOTRE_URL_DE_DEPLOYEMENT_ICI";
+    const urlScript = "https://script.google.com/macros/s/AKfycbyN37sEHZE_6i8ek7du9Ra8sME2YYSBt42ihPyIElAD69PRVNTD-hHL2_19ZtbKMz6P/exec";
     
     try {
         const response = await fetch(urlScript);
