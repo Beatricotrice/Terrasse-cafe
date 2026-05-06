@@ -252,7 +252,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
       <div class="b-actions" style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light)">
-        <button class="btn btn-primary" onclick="submitAvail()">Envoyer mes disponibilités</button>
+        <button class="btn btn-primary" onclick="envoyerDispos()">Envoyer mes disponibilités</button>
         <button class="btn btn-sm" id="b-clear-btn" onclick="clearBSel()" style="display:none">Effacer tout</button>
       </div>
     </div>
@@ -1458,6 +1458,78 @@ if(!orgUnlocked){
 window.addEventListener('resize',()=>{
   if(document.getElementById('pane-organisatrice').classList.contains('visible'))renderHoraire();
 });
+
+  function envoyerDispos() {
+    // 1. On récupère les données des toggles et dropdowns
+    const maDispo = {
+        nom: document.getElementById('vol-select').value,
+        jour: "Lundi", // Dynamique selon le toggle
+        dispo: document.getElementById('b-week-section').checked,
+        heureDebut: document.getElementById('b-days-wrap').value,
+        heureFin: document.getElementById('b-summary').value
+    };
+
+    // 2. On envoie l'objet JSON à l'URL de votre déploiement Google Apps Script
+    const urlScript = "https://script.google.com/macros/s/AKfycbyN37sEHZE_6i8ek7du9Ra8sME2YYSBt42ihPyIElAD69PRVNTD-hHL2_19ZtbKMz6P/exec";
+
+    fetch(urlScript, {
+        method: "POST",
+        mode: "no-cors", // Important pour éviter les erreurs de sécurité simples
+        cache: "no-cache",
+        body: JSON.stringify(maDispo)
+    })
+    .then(() => {
+        alert("Vos disponibilités ont été envoyées à l'organisatrice !");
+    })
+    .catch(error => console.error("Erreur :", error));
+}
+
+async function chargerCalendrier() {
+    const urlScript = "VOTRE_URL_DE_DEPLOYEMENT_ICI";
+    
+    try {
+        const response = await fetch(urlScript);
+        const benevolesData = await response.json();
+        
+        // On traite chaque entrée reçue de la Google Sheet
+        benevolesData.forEach(entree => {
+            if (entree.dispo === true || entree.dispo === "true") {
+                afficherDansCalendrier(entree);
+            }
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération :", error);
+    }
+}
+
+function afficherDansCalendrier(entree) {
+    // 1. Trouver la case ou la colonne correspondant au 'jour'
+    // 2. Créer un petit élément visuel avec le 'nom' et les 'heures'
+    // 3. L'ajouter dans l'interface
+    console.log(`Ajout de ${entree.nom} le ${entree.jour} de ${entree.heureDebut} à ${entree.heureFin}`);
+}
+
+// Lancer la récupération au chargement
+window.onload = chargerCalendrier;
+
+function afficherDansCalendrier(entree) {
+    // On cible la colonne de droite de votre image
+    const listeBenevoles = document.querySelector('.colonne-benevoles'); 
+
+    // On crée la structure HTML de votre carte bleue
+    const carte = document.createElement('div');
+    carte.className = 'carte-benevole-bleue'; // Utilisez votre classe CSS existante
+    carte.innerHTML = `
+        <strong>${entree.nom}</strong><br>
+        <span>${entree.heureDebut} — ${entree.heureFin}</span>
+    `;
+
+    // On rend la carte "draggable" pour qu'elle puisse aller dans la grille
+    carte.draggable = true;
+    
+    listeBenevoles.appendChild(carte);
+}
+  
 </script>
 </body>
 </html>
